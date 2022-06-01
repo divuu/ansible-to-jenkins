@@ -1,8 +1,9 @@
 ---
 - hosts: jenkins_group
+  become: true
 
 - name: JENKINS-PASSTOKEN | Get initial authentication token
-  shell: 'cat /path_to_jenkins-home_at_docker_host/secrets/initialAdminPassword'
+  shell: 'cat /var/lib/jenkins/secrets/initialAdminPassword'
   register: admin_auth_token
 
 - name: JENKINS-CTEDENTIALS | Create CRUMB authentication request
@@ -25,5 +26,4 @@
     headers:
       Jenkins-Crumb: '{{ crumb.content.split(":")[1] }}'
       Cookie: '{{ crumb.set_cookie }}'
-    # body: 'username=user2&password1=pass&password2=pass&fullname=fullname&email=bubba%40dummy.bg'
     body: 'username={{ jenkins_user }}&password1={{ jenkins_pass }}&password2={{ jenkins_pass }}&fullname={{ jenkins_fullname }}&email={{ jenkins_email }}'
