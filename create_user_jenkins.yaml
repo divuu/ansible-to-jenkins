@@ -27,3 +27,36 @@
       Jenkins-Crumb: '{{ crumb.content.split(":")[1] }}'
       Cookie: '{{ crumb.set_cookie }}'
     body: 'username={{ jenkins_user }}&password1={{ jenkins_pass }}&password2={{ jenkins_pass }}&fullname={{ jenkins_fullname }}&email={{ jenkins_email }}'
+    
+    
+    
+    /////// in progress
+    
+- uri:
+    url: 'http://{{ HostName }}:8080/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)'
+    user: admin
+    password: admin
+    force_basic_auth: yes
+    return_content: yes
+  register: crumb
+
+- uri:
+    method: POST
+    url: 'http://{{ HostName }}:8080/credentials/store/system/domain/_/createCredentials'
+    user: admin
+    password: admin
+    force_basic_auth: yes
+    headers:
+      Jenkins-Crumb: "{{ crumb.content.split(':')[1] }}"
+    body: |
+      json={
+        "": "0",
+        "credentials": {
+          "scope": "GLOBAL",
+          "id": "credential_id_here",
+          "username": "username_here",
+          "password": "password_here",
+          "description": "My new credentials",
+          "$class": "com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl"
+        }
+      }
